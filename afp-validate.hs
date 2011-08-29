@@ -1,7 +1,7 @@
 module Main where
 import OpenAFP
 import System.Exit
-import qualified Control.Exception as E (try, catch, throwIO)
+import qualified Control.Exception as E (try, catch, throwIO, SomeException)
 
 main :: IO ()
 main = do
@@ -26,7 +26,7 @@ main = do
         case rv of
             Right ok -> return ok
             Left err -> do
-                print err
+                print (err :: E.SomeException)
                 return False
     if and oks
         then exitWith ExitSuccess

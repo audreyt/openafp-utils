@@ -1,9 +1,10 @@
 module Main where
 import Text.XHtml
-import Codec.Text.UConv
+import Codec.Text.IConv
 import OpenAFP hiding ((!))
 import qualified Data.Set as Set
 import qualified Data.ByteString as S
+import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Char8 as C
 import qualified Data.HashTable as H
 
@@ -154,25 +155,33 @@ typeHtml' :: RecordType -> Html
 typeHtml' t = thediv << (typeStr +++ primHtml " &mdash; " +++ typeDesc)
     where
     typeStr = bold << reverse (takeWhile (/= '.') (reverse typeRepr))
-    typeDesc = stringToHtml $ descLookup (MkChunkType $ typeInt t)
+    typeDesc = stringToHtml $ descLookup (mkChunkType t)
     typeRepr = show t
 
 ptxHtml :: [N1] -> [Html]
 ptxHtml nstr = [table << textHtml]
     where
     textHtml = textLine ++ [ nstrLine ]
-    textLine = [ fieldHtml (ViewField (C.pack $ "(" ++ n ++ ")") (ViewString (typeOf ()) (C.pack txt))) | (n, txt) <- texts nstr ]
+    textLine = [ fieldHtml (ViewField (C.pack $ "(" ++ n ++ ")") (ViewString (typeOf ()) txt)) | (n, txt) <- texts nstr ]
     nstrLine = tr << td ! [colspan 2] << thespan << nstrHtml nstr
 
+texts :: [N1] -> [(String, ByteString)]
 texts nstr = maybeToList $ msum [ maybe Nothing (Just . ((,) cp)) $ conv (codeName cp) | cp <- encs ]
     where
     conv c@"ibm-937"
-        | (even $ length nstr)  = convert c "utf8" (packNStr $ toNStr (0x0E : nstr))
+        | (even $ length nstr)  = convert' c "utf8" (packNStr $ toNStr (0x0E : nstr))
         | otherwise             = Nothing
-    conv c = convert c "utf8" (packNStr $ toNStr nstr)
+    conv c = convert' c "utf8" (packNStr $ toNStr nstr)
     codeName c
         | isJust $ find (not . isDigit) c   = c
         | otherwise                         = "ibm-" ++ c
+
+convert' :: String -> String -> ByteString -> Maybe ByteString
+convert' from to str = case convertStrictly from to strLazy of
+    Left resLazy -> Just $ S.concat (L.toChunks resLazy)
+    _            -> Nothing
+    where
+    strLazy = L.fromChunks [str]
 
 fieldsHtml :: [ViewField] -> [Html]
 fieldsHtml fs = [table << fsHtml] ++ membersHtml

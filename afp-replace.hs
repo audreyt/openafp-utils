@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable, FlexibleContexts #-}
 module Main where
 import OpenAFP
 import qualified Data.ByteString.Lazy as L
