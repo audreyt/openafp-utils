@@ -8,7 +8,7 @@ Synopsis:           Assorted utilities to work with AFP data streams
 Description:        Assorted utilities to work with AFP data streams
 Category:           Data
 Build-type:         Simple
-Cabal-Version:      >= 1.3.3
+Cabal-Version:      >= 1.6
 
 Executable afp2line2pdf
     Main-is:            afp2line2pdf.hs
@@ -69,3 +69,7 @@ Executable afp2line
     Main-is:            afp2line.hs
     Build-depends:      OpenAFP >= 1.3, base
     Extensions:         GeneralizedNewtypeDeriving 
+
+source-repository head
+  type:     git
+  location: git://github.com/audreyt/openafp-utils.git
