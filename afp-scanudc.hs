@@ -48,18 +48,19 @@ main = do
 
 scanUDC :: FilePath -> IO Bool
 scanUDC file = do
-    rv <- E.try $ readAFP file
+    rv <- E.try $ readAFP file :: IO (Either SomeException [AFP_])
     case rv of
         Right cs    -> (`E.catch` hdl) $ do
             let ptxs = length cs `seq` filter (~~ _PTX) cs
             mapM_ (scanPTX . decodeChunk) ptxs
             return False
-        _           -> return False -- skip non-afp files
+        _ -> return False -- skip non-afp files
     where
     tryOpen = openBinaryFile file ReadMode `E.catch` tryErr
-    tryErr (E.IOException ioe) | isFullError ioe = threadDelay 200 >> tryOpen
-    tryErr e = E.throwIO e
-    hdl (E.IOException ioe) | Just e <- cast ioe, isUserError e = return True
+    tryErr e | Just ioe <- cast e, isFullError ioe = threadDelay 200 >> tryOpen
+    tryErr e = E.throwIO (e :: SomeException)
+    hdl :: SomeException -> IO Bool
+    hdl e | Just ioe <- cast e, isUserError ioe = return True
     hdl _ = return False
 
 scanPTX :: PTX -> IO ()
