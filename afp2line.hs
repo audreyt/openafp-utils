@@ -158,8 +158,8 @@ ptxGroupDump (scfl:cs) = do
     curEncoding <- lookupFontEncoding scflId
     cs ..>
         [ _PTX_TRN ... \trn -> do
-            when (ptx_scfl (decodeChunk scfl) == 2) $ do
-                hPrint stderr (ptx_trn trn) 
+            -- when (ptx_scfl (decodeChunk scfl) == 2) $ do
+            --     hPrint stderr (ptx_trn trn) 
             case curEncoding of
                 Just CP37    -> let bstr = packAStr' (ptx_trn trn) in do
                     insertText bstr
@@ -168,7 +168,7 @@ ptxGroupDump (scfl:cs) = do
                     insertText bstr
                     modifyIORef _CurrentColumn (+ S.length bstr)
                 Just CP939   -> pack939 (ptx_trn trn) >>= \bstr -> do
-                    C.hPut stderr bstr
+                    -- C.hPut stderr bstr
                     insertText bstr
                     modifyIORef _CurrentColumn (+ S.length bstr)
                 Just CP950   -> let bstr = packBuf (ptx_trn trn) in do

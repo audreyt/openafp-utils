@@ -12,7 +12,7 @@ Cabal-Version:      >= 1.6
 
 Executable afp2line2pdf
     Main-is:            afp2line2pdf.hs
-    Build-depends:      OpenAFP >= 1.3, base >= 4 && < 5, line2pdf >= 0.0.7
+    Build-depends:      OpenAFP >= 1.3, base >= 4 && < 5, line2pdf >= 0.0.7, bytestring
     Extensions:         StandaloneDeriving, GeneralizedNewtypeDeriving, ImplicitParams,
                         ExistentialQuantification, PatternGuards
 
@@ -67,7 +67,7 @@ Executable afp-validate
 
 Executable afp2line
     Main-is:            afp2line.hs
-    Build-depends:      OpenAFP >= 1.3, base >= 4 && < 5
+    Build-depends:      OpenAFP >= 1.3, base >= 4 && < 5, containers
     Extensions:         GeneralizedNewtypeDeriving 
 
 source-repository head
