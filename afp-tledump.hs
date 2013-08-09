@@ -15,6 +15,6 @@ main = do
         let Just (fqn:av:_) = tle_Chunks `applyToChunk` tle
             Just key = t_fqn `applyToChunk` fqn
             Just val = t_av `applyToChunk` av
-        putStr (fromAStr key)
+        putStr (filter (/= '\x00') $ fromAStr key)
         putStr "="
-        putStrLn (fromAStr val)
+        putStrLn (filter (/= '\x00') $ fromAStr val)
