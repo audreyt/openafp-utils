@@ -114,9 +114,6 @@ processFile F_AFP f = do
         modifyIORef __MAX_WIDTH__ (max xSize)
         modifyIORef __MAX_HEIGHT__ (max ySize)
 
-    modifyIORef __MAX_WIDTH__ (+30)
-    modifyIORef __MAX_HEIGHT__ (+30)
-
     forM_ (tail $ splitRecords _BPG cs) $ \pageChunks -> do
         -- Start page
         markObj $ \obj -> do
@@ -286,7 +283,7 @@ ptxGroupDump (scfl:cs) | scfl ~~ _PTX_SCFL = do
                     pr$ show curSize ++ " TL\n"
                     col <- readIORef _CurrentColumn
                     ln  <- readIORef _CurrentLine
-                    pr$ "1 0 0 1 " ++ show (col + 25) ++ " " ++ show (height - ln - 25) ++ " Tm("
+                    pr$ "1 0 0 1 " ++ show (col - 1) ++ " " ++ show (height - ln - 1) ++ " Tm("
                     let escape ch = C.intercalate (C.pack ['\\', ch]) . C.split ch
                         escapeTxt = escape '(' . escape ')' . escape '\\'
                     origBStr <- getBStr
