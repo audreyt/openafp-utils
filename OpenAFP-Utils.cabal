@@ -9,6 +9,7 @@ Description:        Assorted utilities to work with AFP data streams
 Category:           Data
 Build-type:         Simple
 Cabal-Version:      >= 1.6
+extra-source-files: ChangeLog
 
 Executable afp2line2pdf
     Main-is:            afp2line2pdf.hs
