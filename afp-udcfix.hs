@@ -8,7 +8,7 @@ import qualified Data.ByteString.Lazy as L
 import Data.Int
 import Text.Regex.Posix
 import Text.Regex.Base.RegexLike
-import Data.Hashable (Hashable(..), hashUsing)
+import Data.Hashable (Hashable(..))
 
 -- | Flags.
 type VarsIO a = StateIO Vars a
@@ -393,16 +393,16 @@ data Vars = Vars
 type Config = Int
 
 data CacheKey = MkCacheKey
-    { ck_hash   :: !Int32
+    { ck_hash   :: !Int
     , ck_font   :: !ByteString
     }
     deriving Eq
 instance Hashable CacheKey where
-    hashWithSalt = hashUsing ck_hash
+    hashWithSalt salt = hashWithSalt salt . ck_hash
 
 cacheKey :: ByteString -> NChar -> CacheKey
 cacheKey font (hi, lo) = MkCacheKey 
-    (hashString (chr (fromEnum hi) : chr (fromEnum lo) : C.unpack font))
+    (hash (fromEnum hi, fromEnum lo, font))
     font
 
 initVars :: IO Vars

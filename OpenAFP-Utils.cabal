@@ -58,7 +58,7 @@ Executable afp-type
 
 Executable afp-udcfix
     Main-is:            afp-udcfix.hs
-    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, regex-base, regex-posix
+    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, regex-base, regex-posix, hashable
     Extensions:         DeriveDataTypeable, MultiParamTypeClasses, FlexibleContexts, PatternGuards, RankNTypes
 
 Executable afp-validate
