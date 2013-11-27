@@ -115,7 +115,7 @@ insertFonts = mapM_ $ \(i, f) -> do
 
 {-# NOINLINE _FontToEncoding #-}
 _FontToEncoding :: HashTable N1 Encoding
-_FontToEncoding = unsafePerformIO $ hashNew (==) fromIntegral
+_FontToEncoding = unsafePerformIO hashCreate
 
 -- | Record font Id to Name mappings in MCF's RLI and FQN chunks.
 mcfHandler :: MCF -> IO ()

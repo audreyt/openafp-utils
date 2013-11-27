@@ -8,6 +8,7 @@ import qualified Data.ByteString.Lazy as L
 import Data.Int
 import Text.Regex.Posix
 import Text.Regex.Base.RegexLike
+import Data.Hashable (Hashable(..), hashUsing)
 
 -- | Flags.
 type VarsIO a = StateIO Vars a
@@ -396,6 +397,8 @@ data CacheKey = MkCacheKey
     , ck_font   :: !ByteString
     }
     deriving Eq
+instance Hashable CacheKey where
+    hashWithSalt = hashUsing ck_hash
 
 cacheKey :: ByteString -> NChar -> CacheKey
 cacheKey font (hi, lo) = MkCacheKey 
@@ -414,8 +417,8 @@ initVars = do
     fid <- newIORef 0
     udc <- newIORef []
     idf <- newIOArray (0x00, 0xFF) C.empty
-    ifc <- hashNew (==) ck_hash
-    inc <- hashNew (==) ck_hash
+    ifc <- hashCreate
+    inc <- hashCreate
     opt <- getOpts
     return $ Vars xp x y xo yo im bi fid udc idf ifc inc opt
 
@@ -458,7 +461,7 @@ getOpts = do
 
 {-# NOINLINE _ReaderCache #-}
 _ReaderCache :: HashTable ByteString [AFP_]
-_ReaderCache = unsafePerformIO (hashNew (==) hashByteString)
+_ReaderCache = unsafePerformIO hashCreate
 
 infixl 4 &:
 l &: v = do

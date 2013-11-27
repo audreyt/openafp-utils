@@ -6,7 +6,6 @@ import qualified Data.Set as Set
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Char8 as C
-import qualified Data.HashTable as H
 
 -- The key here is inventing a ConcreteDataView for our data structure.
 -- See OpenAFP.Types.View for details.
@@ -134,21 +133,21 @@ recHtml (ViewRecord t fs)
     = li << (typeHtml t +++ fieldsHtml fs)
 
 {-# NOINLINE _TypeHtmlCache #-}
-_TypeHtmlCache :: H.HashTable RecordType Html 
-_TypeHtmlCache = unsafePerformIO $ H.new (==) (hashInt . typeInt)
+_TypeHtmlCache :: HashTable RecordType Html
+_TypeHtmlCache = unsafePerformIO hashCreate
 
 {-# NOINLINE _FontToEncoding #-}
 _FontToEncoding :: HashTable N1 Encoding
-_FontToEncoding = unsafePerformIO $ hashNew (==) fromIntegral
+_FontToEncoding = unsafePerformIO hashCreate
 
 typeHtml :: RecordType -> Html
 typeHtml t = unsafePerformIO $ do
-    rv <- H.lookup _TypeHtmlCache t
+    rv <- hashLookup _TypeHtmlCache t
     case rv of 
         Just html   -> return html
         _           -> do
             let html = typeHtml' t
-            H.insert _TypeHtmlCache t html
+            hashInsert _TypeHtmlCache t html
             return html
 
 typeHtml' :: RecordType -> Html
