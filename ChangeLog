@@ -1,0 +1,12 @@
+# 1.4.1.1
+
+* Add afp-tledump utility.
+
+# 1.4.1
+
+* Remove iconv dependency.
+
+# 1.4.0
+
+* Switch to hashtables & hashable packages for GHC 7.8.1 compatibility.
+* No functional changes.
