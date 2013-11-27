@@ -1,6 +1,5 @@
 module Main where
 import Text.XHtml
-import Codec.Text.IConv
 import OpenAFP hiding ((!))
 import qualified Data.Set as Set
 import qualified Data.ByteString as S
@@ -174,6 +173,9 @@ texts nstr = maybeToList $ msum [ maybe Nothing (Just . ((,) cp)) $ conv (codeNa
     codeName c
         | isJust $ find (not . isDigit) c   = c
         | otherwise                         = "ibm-" ++ c
+
+-- TODO: Rewrite with GHC IO Encoding
+convertStrictly _ _ _ = Right ()
 
 convert' :: String -> String -> ByteString -> Maybe ByteString
 convert' from to str = case convertStrictly from to strLazy of

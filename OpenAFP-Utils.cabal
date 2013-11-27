@@ -1,5 +1,5 @@
 Name:               OpenAFP-Utils
-Version:            1.4.0
+Version:            1.4.1
 License:            PublicDomain
 License-file:       LICENSE
 Author:             Audrey Tang
@@ -23,7 +23,7 @@ Executable afp-olndump
 
 Executable afp-dump
     Main-is:            afp-dump.hs
-    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, bytestring, containers, iconv, xhtml
+    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, bytestring, containers, xhtml
     Extensions:         DeriveDataTypeable, PatternGuards
 
 Executable afp-page
