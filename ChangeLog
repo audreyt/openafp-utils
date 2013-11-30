@@ -1,3 +1,7 @@
+# 1.4.1.3
+
+* Support DBCS encodings in afp-dump, including EBCDIC.
+
 # 1.4.1.2
 
 * Restore "afp-dump -e" support using GHC's internal encoding.

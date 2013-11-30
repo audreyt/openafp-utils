@@ -1,10 +1,13 @@
 module Main where
 import Text.XHtml
 import OpenAFP hiding ((!))
+import qualified OpenAFP ((!))
 import qualified Data.Set as Set
 import qualified Data.ByteString as S
-import qualified Data.ByteString.Lazy as L
+import qualified Data.ByteString.Unsafe as S
+import qualified Data.ByteString.Internal as S
 import qualified Data.ByteString.Char8 as C
+import qualified Data.Text as T
 import Data.Text.Encoding.Locale (decodeLocale', encodeLocale')
 import System.IO (noNewlineTranslation)
 
@@ -168,15 +171,24 @@ ptxHtml nstr = [table << textHtml]
 texts :: [N1] -> [(String, ByteString)]
 texts nstr = maybeToList $ msum [ maybe Nothing (Just . ((,) cp)) $! conv (codeName cp) | cp <- encs ]
     where
+    {-
     conv c@"ibm-937"
         | (even $ length nstr)  = convert' c "UTF-8" (packNStr $ toNStr (0x0E : nstr))
         | otherwise             = Nothing
+    -}
     conv c = convert' c "UTF-8" (packNStr $ toNStr nstr)
     codeName c
         | isJust $ find (not . isDigit) c   = c
         | otherwise                         = "ibm-" ++ c
 
 {-# NOINLINE convert' #-}
+convert' "ibm-835" to str = convert' "CP950" to (packWith convert835to950 str)
+convert' "ibm-939" to str = convert' "CP932" to (packWith convert939to932 str)
+convert' "ibm-947" to str = convert' "CP950" to str
+convert' "ibm-950" to str = convert' "CP950" to str
+convert' "ibm-937" to str = convert' "CP950" to $ S.map ((OpenAFP.!) ebc2ascIsPrintW8) str
+convert' "ibm-500" to str = convert' "ascii" to $ S.map ((OpenAFP.!) ebc2ascIsPrintW8) str
+convert' "ibm-37" to str = convert' "ascii" to $ S.map ((OpenAFP.!) ebc2ascIsPrintW8) str
 convert' from to str = case unsafePerformIO doConvert of
     Left ioerr -> Nothing
     Right str -> Just $! str
@@ -186,6 +198,19 @@ convert' from to str = case unsafePerformIO doConvert of
         encTo   <- mkTextEncoding to
         txt     <- decodeLocale' encFrom noNewlineTranslation str
         encodeLocale' encTo noNewlineTranslation txt
+
+{-# INLINE packWith #-}
+packWith :: (Int -> Int) -> ByteString -> ByteString
+packWith f buf = unsafePerformIO $ S.unsafeUseAsCStringLen buf $ \(src, len) -> S.create len $ \target -> do
+    let s = castPtr src
+    let t = castPtr target
+    forM_ [0..(len `div` 2)-1] $ \i -> do
+        hi  <- peekByteOff s (i*2)       :: IO Word8
+        lo  <- peekByteOff s (i*2+1)     :: IO Word8
+        let ch         = f (fromEnum hi * 256 + fromEnum lo)
+            (hi', lo') = ch `divMod` 256
+        pokeByteOff t (i*2)   (toEnum hi' :: Word8)
+        pokeByteOff t (i*2+1) (toEnum lo' :: Word8)
 
 fieldsHtml :: [ViewField] -> [Html]
 fieldsHtml fs = [table << fsHtml] ++ membersHtml
@@ -222,9 +247,14 @@ fieldHtml (ViewField str content)
 contentHtml :: ViewContent -> Html
 contentHtml x = case x of
     ViewNumber _ n -> stringToHtml $ show n
-    ViewString _ s -> stringToHtml $ ['"'] ++ C.unpack s ++ ['"']
+    ViewString _ s -> stringToHtml $ ['"'] ++ unpackUTF8 s ++ ['"']
     ViewNStr  _ cs -> thespan << nstrHtml (map N1 (S.unpack cs))
     _              -> error (show x)
+
+unpackUTF8 :: ByteString -> String
+unpackUTF8 buf = unsafePerformIO $ do
+    enc <- mkTextEncoding "UTF-8"
+    fmap T.unpack $ decodeLocale' enc noNewlineTranslation buf
 
 nstrHtml :: [N1] -> String
 nstrHtml nstr
