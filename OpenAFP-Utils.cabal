@@ -27,7 +27,7 @@ Executable afp-tledump
 
 Executable afp-dump
     Main-is:            afp-dump.hs
-    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, bytestring, containers, xhtml
+    Build-depends:      OpenAFP >= 1.4, base >= 4 && < 5, bytestring, containers, xhtml, text-locale-encoding
     Extensions:         DeriveDataTypeable, PatternGuards
 
 Executable afp-page

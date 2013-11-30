@@ -5,6 +5,8 @@ import qualified Data.Set as Set
 import qualified Data.ByteString as S
 import qualified Data.ByteString.Lazy as L
 import qualified Data.ByteString.Char8 as C
+import Data.Text.Encoding.Locale (decodeLocale', encodeLocale')
+import System.IO (noNewlineTranslation)
 
 -- The key here is inventing a ConcreteDataView for our data structure.
 -- See OpenAFP.Types.View for details.
@@ -164,25 +166,26 @@ ptxHtml nstr = [table << textHtml]
     nstrLine = tr << td ! [colspan 2] << thespan << nstrHtml nstr
 
 texts :: [N1] -> [(String, ByteString)]
-texts nstr = maybeToList $ msum [ maybe Nothing (Just . ((,) cp)) $ conv (codeName cp) | cp <- encs ]
+texts nstr = maybeToList $ msum [ maybe Nothing (Just . ((,) cp)) $! conv (codeName cp) | cp <- encs ]
     where
     conv c@"ibm-937"
-        | (even $ length nstr)  = convert' c "utf8" (packNStr $ toNStr (0x0E : nstr))
+        | (even $ length nstr)  = convert' c "UTF-8" (packNStr $ toNStr (0x0E : nstr))
         | otherwise             = Nothing
-    conv c = convert' c "utf8" (packNStr $ toNStr nstr)
+    conv c = convert' c "UTF-8" (packNStr $ toNStr nstr)
     codeName c
         | isJust $ find (not . isDigit) c   = c
         | otherwise                         = "ibm-" ++ c
 
--- TODO: Rewrite with GHC IO Encoding
-convertStrictly _ _ _ = Right ()
-
-convert' :: String -> String -> ByteString -> Maybe ByteString
-convert' from to str = case convertStrictly from to strLazy of
-    Left resLazy -> Just $ S.concat (L.toChunks resLazy)
-    _            -> Nothing
+{-# NOINLINE convert' #-}
+convert' from to str = case unsafePerformIO doConvert of
+    Left ioerr -> Nothing
+    Right str -> Just $! str
     where
-    strLazy = L.fromChunks [str]
+    doConvert = tryIOError $ do
+        encFrom <- mkTextEncoding from
+        encTo   <- mkTextEncoding to
+        txt     <- decodeLocale' encFrom noNewlineTranslation str
+        encodeLocale' encTo noNewlineTranslation txt
 
 fieldsHtml :: [ViewField] -> [Html]
 fieldsHtml fs = [table << fsHtml] ++ membersHtml
