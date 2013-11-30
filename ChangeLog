@@ -1,3 +1,7 @@
+# 1.4.1.2
+
+* Restore "afp-dump -e" support using GHC's internal encoding.
+
 # 1.4.1.1
 
 * Add afp-tledump utility.
