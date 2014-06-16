@@ -11,7 +11,7 @@ import qualified Data.ByteString.Char8 as C
 main :: IO ()
 main = do
     args    <- getArgs
-    if null args then error "Usage: afp-split file.afp [pages]" else do
+    if null args then error "Usage: afp-split file.afp 8 9 10 11 12" else do
     let (inFile:outPages) = args
     cs      <- readAFP inFile
     let (preamble:rest) = splitPages cs
